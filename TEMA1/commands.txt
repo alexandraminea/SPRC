@@ -1,0 +1,10 @@
+login us1
+load
+add 1110 4 1.0 2.5 0.5 3.5
+del 2256
+update 3345 3 7.0 2.3 9.1
+read 2134
+get_stat 2134
+get_stat_all
+store
+logout
