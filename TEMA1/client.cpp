@@ -90,7 +90,7 @@ int main(int argc, char *argv[]){
             // build struct sensor_data
             string word;
             iss >> word >> id >> n;
-            cout << n << endl;
+            // cout << n << endl;
             val.values.values_val = (float *) malloc (n * sizeof (float));
             for (int i = 0 ; i < n ; i++)
                 iss >> val.values.values_val[i];
@@ -107,10 +107,6 @@ int main(int argc, char *argv[]){
             resp = add_1(&data, handle);
             cout << resp->resp << endl;
         }
-    }
-
-    while(true){
-
     }
 	
 	return 0;

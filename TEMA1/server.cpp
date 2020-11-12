@@ -23,7 +23,7 @@ unsigned long count = 1;
 map<string, unsigned long> users;
 map<string, vector<struct sensor_data>> database;
 
-std::unordered_set<string> filenames;
+unordered_set<string> filenames;
 
 bool search_user(string name) {
     map<string , unsigned long>::iterator it;
@@ -93,23 +93,22 @@ string get_user(unsigned long *key) {
 void store_file(string filename) {
     string path = "./database/" + filename;
     ofstream f(path.c_str());
-    int id, n;
-    for (auto data : database[filename]) {
-        f << data.data_id << " " << data.values.values_len;
-        for (int i = 0; i < data.values.values_len; i++)
-        {
-            f << " " << data.values.values_val[i];
-            cout << data.values.values_val[i] << endl;
-        }
+    vector<struct sensor_data> v = database[filename];
+    for(int i = 0; i < v.size(); i++)
+    {   
+        f << v[i].data_id << " " << v[i].values.values_len << " "; 
+        for(int j = 0; j < v[i].values.values_len; j++)
+            f << v[i].values.values_val[j] << " ";
         f << endl;
     }
+
     f.close();
 }
 
 void add_data(string filename, struct sensor_data data) {
-    database[filename].push_back(data);
+    
+    database[filename].push_back(data);        
 }
-
 
 unsigned long* login_1_svc(username* user, struct svc_req *cl) {
     static unsigned long res = 0;
@@ -143,7 +142,7 @@ response* load_1_svc(unsigned long *key, struct svc_req *cl) {
         exit(10);
     }
 
-    // fisierul pentru user nu exista pe disk
+    // user file doesn't exist on disk yet
     if(!search_filename(file)) {
         add_file(file);
     } else
@@ -152,24 +151,32 @@ response* load_1_svc(unsigned long *key, struct svc_req *cl) {
     return resp;
 }
 
+response* add_1_svc(struct user_data *data, struct svc_req *cl) {
+	response *resp = (response *) malloc (sizeof(response));
+    unsigned long key = data->key;
+    string name = get_user(&key);
+
+    // copy the sensor data into a db entry
+    struct sensor_data entry = data->data;
+
+    // deep copy of float*
+    entry.values.values_val = (float *)malloc(entry.values.values_len *sizeof(float));
+    memcpy(entry.values.values_val, data->data.values.values_val, entry.values.values_len *sizeof(float));
+
+
+    string file = name + ".dbms";
+
+    // add entry in local db (in memory)
+    add_data(file, entry);
+    resp->resp = strdup("DATA ADDED");
+    return resp;
+}
+
 response* store_1_svc(unsigned long *key, struct svc_req *cl) {
 	response *resp = (response *) malloc (sizeof(response));
     string name = get_user(key);
     string file = name + ".dbms";
-    // suprascriere info din fisier cu info din memorie
     store_file(file);
     resp->resp = strdup("DB STORED");
-    return resp;
-}
-
-response* add_1_svc(struct user_data *data, struct svc_req *cl) {
-	response *resp = (response *) malloc (sizeof(response));
-
-    unsigned long key = data->key;
-    string name = get_user(&key);
-    struct sensor_data entry = data->data;
-    string file = name + ".dbms";
-    add_data(file, entry);
-    resp->resp = strdup("DATA ADDED");
     return resp;
 }
