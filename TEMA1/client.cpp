@@ -39,34 +39,79 @@ int main(int argc, char *argv[]){
 		return -1;
 	}
 
-    bool load = false;
+    username *user = (username *) malloc(sizeof(username));
+    response *resp = (response *) malloc (sizeof(response)); 
 
+    bool load_data = false;
+    unsigned long *key;
     string line;
     getline(fcom, line);
 
     if(line.compare(0, 5, "login") != 0)
+    {
         cout << "You must login first: login <username>" << endl;
-    else {
-        string name = getNthWord(line, 3);
-        cout<<name<<endl;
-        
-        username *user = (username *) malloc(sizeof(username));
-        response *resp = (response *) malloc (sizeof(response));        
-        user->name = strdup(name.c_str());
-
-        // login
-        resp = login_1(user, handle);
-        cout << resp->resp << endl;
-
+        exit(1);
     }
+
+    // username
+    string name = getNthWord(line, 3);
+    user->name = strdup(name.c_str());
+
+    // login
+    key = login_1(user, handle);
+    cout << "Received key from server: " << *key << endl;
+
     getline(fcom, line);
     if(line.compare(0, 4, "load") == 0)
-        load = true;
-	while(getline(fcom, line)) {
-        //cout << line << endl;
+        load_data = true;
+
+    // load
+    if(load_data) {
+
+        resp = load_1(key, handle);
+        cout << resp->resp << endl;
+    } else {
+        // no load
     }
 
+	while(getline(fcom, line)) {
 
+        // store
+        if (!line.compare("store")) {
+            resp = store_1(key, handle);
+            cout << resp->resp << endl;
+        }
+        else if (!line.compare(0, 3, "add")) {
+            istringstream iss(line);
+            int id, n;
+            struct sensor_data val;
+            struct user_data data;
+            
+            // build struct sensor_data
+            string word;
+            iss >> word >> id >> n;
+            cout << n << endl;
+            val.values.values_val = (float *) malloc (n * sizeof (float));
+            for (int i = 0 ; i < n ; i++)
+                iss >> val.values.values_val[i];
+            val.data_id = id;
+            val.values.values_len = n;
+            
+            //build struct user data
+            data.key = *key;
+            data.data = val;
+
+            // for(int i = 0; i < n; i++)
+            //     cout << data.data.values.values_val[i] << endl;
+
+            resp = add_1(&data, handle);
+            cout << resp->resp << endl;
+        }
+    }
+
+    while(true){
+
+    }
 	
 	return 0;
 }

@@ -6,13 +6,26 @@
 #include "rpcdb.h"
 
 bool_t
-xdr_sum_data (XDR *xdrs, sum_data *objp)
+xdr_sensor_data (XDR *xdrs, sensor_data *objp)
 {
 	register int32_t *buf;
 
-	 if (!xdr_int (xdrs, &objp->x))
+	 if (!xdr_int (xdrs, &objp->data_id))
 		 return FALSE;
-	 if (!xdr_int (xdrs, &objp->y))
+	 if (!xdr_array (xdrs, (char **)&objp->values.values_val, (u_int *) &objp->values.values_len, ~0,
+		sizeof (float), (xdrproc_t) xdr_float))
+		 return FALSE;
+	return TRUE;
+}
+
+bool_t
+xdr_user_data (XDR *xdrs, user_data *objp)
+{
+	register int32_t *buf;
+
+	 if (!xdr_sensor_data (xdrs, &objp->data))
+		 return FALSE;
+	 if (!xdr_u_long (xdrs, &objp->key))
 		 return FALSE;
 	return TRUE;
 }

@@ -9,14 +9,59 @@
 /* Default timeout can be changed using clnt_control() */
 static struct timeval TIMEOUT = { 25, 0 };
 
-response *
+u_long *
 login_1(username *argp, CLIENT *clnt)
 {
-	static response clnt_res;
+	static u_long clnt_res;
 
 	memset((char *)&clnt_res, 0, sizeof(clnt_res));
 	if (clnt_call (clnt, login,
 		(xdrproc_t) xdr_username, (caddr_t) argp,
+		(xdrproc_t) xdr_u_long, (caddr_t) &clnt_res,
+		TIMEOUT) != RPC_SUCCESS) {
+		return (NULL);
+	}
+	return (&clnt_res);
+}
+
+response *
+load_1(u_long *argp, CLIENT *clnt)
+{
+	static response clnt_res;
+
+	memset((char *)&clnt_res, 0, sizeof(clnt_res));
+	if (clnt_call (clnt, load,
+		(xdrproc_t) xdr_u_long, (caddr_t) argp,
+		(xdrproc_t) xdr_response, (caddr_t) &clnt_res,
+		TIMEOUT) != RPC_SUCCESS) {
+		return (NULL);
+	}
+	return (&clnt_res);
+}
+
+response *
+store_1(u_long *argp, CLIENT *clnt)
+{
+	static response clnt_res;
+
+	memset((char *)&clnt_res, 0, sizeof(clnt_res));
+	if (clnt_call (clnt, store,
+		(xdrproc_t) xdr_u_long, (caddr_t) argp,
+		(xdrproc_t) xdr_response, (caddr_t) &clnt_res,
+		TIMEOUT) != RPC_SUCCESS) {
+		return (NULL);
+	}
+	return (&clnt_res);
+}
+
+response *
+add_1(user_data *argp, CLIENT *clnt)
+{
+	static response clnt_res;
+
+	memset((char *)&clnt_res, 0, sizeof(clnt_res));
+	if (clnt_call (clnt, add,
+		(xdrproc_t) xdr_user_data, (caddr_t) argp,
 		(xdrproc_t) xdr_response, (caddr_t) &clnt_res,
 		TIMEOUT) != RPC_SUCCESS) {
 		return (NULL);

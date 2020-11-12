@@ -14,11 +14,20 @@ extern "C" {
 #endif
 
 
-struct sum_data {
-	int x;
-	int y;
+struct sensor_data {
+	int data_id;
+	struct {
+		u_int values_len;
+		float *values_val;
+	} values;
 };
-typedef struct sum_data sum_data;
+typedef struct sensor_data sensor_data;
+
+struct user_data {
+	struct sensor_data data;
+	u_long key;
+};
+typedef struct user_data user_data;
 
 struct response {
 	char *resp;
@@ -35,26 +44,46 @@ typedef struct username username;
 
 #if defined(__STDC__) || defined(__cplusplus)
 #define login 1
-extern  response * login_1(username *, CLIENT *);
-extern  response * login_1_svc(username *, struct svc_req *);
+extern  u_long * login_1(username *, CLIENT *);
+extern  u_long * login_1_svc(username *, struct svc_req *);
+#define load 2
+extern  response * load_1(u_long *, CLIENT *);
+extern  response * load_1_svc(u_long *, struct svc_req *);
+#define store 3
+extern  response * store_1(u_long *, CLIENT *);
+extern  response * store_1_svc(u_long *, struct svc_req *);
+#define add 4
+extern  response * add_1(user_data *, CLIENT *);
+extern  response * add_1_svc(user_data *, struct svc_req *);
 extern int rpcdb_prog_1_freeresult (SVCXPRT *, xdrproc_t, caddr_t);
 
 #else /* K&R C */
 #define login 1
-extern  response * login_1();
-extern  response * login_1_svc();
+extern  u_long * login_1();
+extern  u_long * login_1_svc();
+#define load 2
+extern  response * load_1();
+extern  response * load_1_svc();
+#define store 3
+extern  response * store_1();
+extern  response * store_1_svc();
+#define add 4
+extern  response * add_1();
+extern  response * add_1_svc();
 extern int rpcdb_prog_1_freeresult ();
 #endif /* K&R C */
 
 /* the xdr functions */
 
 #if defined(__STDC__) || defined(__cplusplus)
-extern  bool_t xdr_sum_data (XDR *, sum_data*);
+extern  bool_t xdr_sensor_data (XDR *, sensor_data*);
+extern  bool_t xdr_user_data (XDR *, user_data*);
 extern  bool_t xdr_response (XDR *, response*);
 extern  bool_t xdr_username (XDR *, username*);
 
 #else /* K&R C */
-extern bool_t xdr_sum_data ();
+extern bool_t xdr_sensor_data ();
+extern bool_t xdr_user_data ();
 extern bool_t xdr_response ();
 extern bool_t xdr_username ();
 

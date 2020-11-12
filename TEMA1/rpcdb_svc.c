@@ -21,6 +21,9 @@ rpcdb_prog_1(struct svc_req *rqstp, register SVCXPRT *transp)
 {
 	union {
 		username login_1_arg;
+		u_long load_1_arg;
+		u_long store_1_arg;
+		user_data add_1_arg;
 	} argument;
 	char *result;
 	xdrproc_t _xdr_argument, _xdr_result;
@@ -33,8 +36,26 @@ rpcdb_prog_1(struct svc_req *rqstp, register SVCXPRT *transp)
 
 	case login:
 		_xdr_argument = (xdrproc_t) xdr_username;
-		_xdr_result = (xdrproc_t) xdr_response;
+		_xdr_result = (xdrproc_t) xdr_u_long;
 		local = (char *(*)(char *, struct svc_req *)) login_1_svc;
+		break;
+
+	case load:
+		_xdr_argument = (xdrproc_t) xdr_u_long;
+		_xdr_result = (xdrproc_t) xdr_response;
+		local = (char *(*)(char *, struct svc_req *)) load_1_svc;
+		break;
+
+	case store:
+		_xdr_argument = (xdrproc_t) xdr_u_long;
+		_xdr_result = (xdrproc_t) xdr_response;
+		local = (char *(*)(char *, struct svc_req *)) store_1_svc;
+		break;
+
+	case add:
+		_xdr_argument = (xdrproc_t) xdr_user_data;
+		_xdr_result = (xdrproc_t) xdr_response;
+		local = (char *(*)(char *, struct svc_req *)) add_1_svc;
 		break;
 
 	default:

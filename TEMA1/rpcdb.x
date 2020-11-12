@@ -1,6 +1,11 @@
-struct sum_data {
-	int x;
-	int y;
+struct sensor_data{
+    int data_id;
+    float values<>;
+};
+
+struct user_data {
+    struct sensor_data data;
+    unsigned long key;
 };
 
 struct response {
@@ -13,6 +18,9 @@ struct username {
 
 program RPCDB_PROG {
 	version RPCDB_VERS {
-		response login(username) = 1;
+		unsigned long login(username) = 1;
+        response load(unsigned long) = 2;
+        response store(unsigned long) = 3;
+        response add(user_data) = 4;
 	} = 1;
 } = 1;
