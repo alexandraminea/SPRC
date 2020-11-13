@@ -82,6 +82,9 @@ extern  response * get_stat_1_svc(read_data *, struct svc_req *);
 #define get_stat_all 9
 extern  response * get_stat_all_1(u_long *, CLIENT *);
 extern  response * get_stat_all_1_svc(u_long *, struct svc_req *);
+#define logout 10
+extern  response * logout_1(u_long *, CLIENT *);
+extern  response * logout_1_svc(u_long *, struct svc_req *);
 extern int rpcdb_prog_1_freeresult (SVCXPRT *, xdrproc_t, caddr_t);
 
 #else /* K&R C */
@@ -112,6 +115,9 @@ extern  response * get_stat_1_svc();
 #define get_stat_all 9
 extern  response * get_stat_all_1();
 extern  response * get_stat_all_1_svc();
+#define logout 10
+extern  response * logout_1();
+extern  response * logout_1_svc();
 extern int rpcdb_prog_1_freeresult ();
 #endif /* K&R C */
 

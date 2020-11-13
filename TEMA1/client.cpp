@@ -10,74 +10,15 @@
 
 using namespace std;
 
-string getNthWord(std::string s, size_t n)
-{
-    std::istringstream iss (s);
-    while(n-- > 0 && (iss >> s));
-    return s;
-}
+CLIENT *handle;
+string filename = "";
+char **res;
+unsigned long *key;
+username *user;
+response *resp;
 
-int main(int argc, char *argv[]){
-
-	/* variabila clientului */
-	CLIENT *handle;
-    
-    string filename = "";
-    string commands_file = "commands.txt";
-    ifstream fcom(commands_file);
-	
-    char **res;
-	
-	handle=clnt_create(
-		RMACHINE,		/* numele masinii unde se afla server-ul */
-		RPCDB_PROG,		/* numele programului disponibil pe server */
-		RPCDB_VERS,		/* versiunea programului */
-		"tcp");			/* tipul conexiunii client-server */
-	
-	if(handle == NULL) {
-		perror("");
-		return -1;
-	}
-
-    username *user = (username *) malloc(sizeof(username));
-    response *resp = (response *) malloc (sizeof(response)); 
-
-    bool load_data = false;
-    unsigned long *key;
-    string line;
-    getline(fcom, line);
-
-    if(line.compare(0, 5, "login") != 0)
-    {
-        cout << "You must login first: login <username>" << endl;
-        exit(1);
-    }
-
-    // username
-    string name = getNthWord(line, 3);
-    user->name = strdup(name.c_str());
-
-    // login
-    key = login_1(user, handle);
-    cout << "Received key from server: " << *key << endl;
-
-    getline(fcom, line);
-    if(line.compare(0, 4, "load") == 0)
-        load_data = true;
-
-    // load
-    if(load_data) {
-
-        resp = load_1(key, handle);
-        cout << resp->resp << endl;
-    } else {
-        // no load
-    }
-
-	while(getline(fcom, line)) {
-
-        // store
-        if (!line.compare("store")) {
+void parse_line(string line) {
+            if (!line.compare("store")) {
             resp = store_1(key, handle);
             cout << resp->resp << endl;
         }
@@ -174,7 +115,87 @@ int main(int argc, char *argv[]){
         } else if (!line.compare(0, 9, "get_stat_")) {
             resp = get_stat_all_1(key, handle);
             cout << resp->resp << endl;
+        } else if (!line.compare(0, 6, "logout")) {
+            resp = logout_1(key, handle);
+            cout << resp->resp << endl;
+            exit(0);
+        } else if(line.compare(0, 4, "load") == 0) {
+            cout << "LOAD HAS NO EFFECT\n";
+        } else {
+            cout << "USUPPORTED COMAND" << endl;
+            cout << "USAGE: store/add/del/read/get_stat/get_stat_all" << endl;
         }
+}
+
+string getNthWord(std::string s, size_t n)
+{
+    std::istringstream iss (s);
+    while(n-- > 0 && (iss >> s));
+    return s;
+}
+
+int main(int argc, char *argv[]){
+
+	/* variabila clientului */
+    
+    string filename = "";
+    string commands_file = "commands.txt";
+    ifstream fcom(commands_file);
+	
+	
+	handle=clnt_create(
+		RMACHINE,		/* numele masinii unde se afla server-ul */
+		RPCDB_PROG,		/* numele programului disponibil pe server */
+		RPCDB_VERS,		/* versiunea programului */
+		"tcp");			/* tipul conexiunii client-server */
+	
+	if(handle == NULL) {
+		perror("");
+		return -1;
+	}
+
+    user = (username *) malloc(sizeof(username));
+    resp = (response *) malloc (sizeof(response)); 
+
+    bool load_data = false;
+    string line;
+    getline(cin, line);
+    cout << line << endl;
+
+    if(line.compare(0, 5, "login") != 0)
+    {
+        cout << "You must login first: login <username>" << endl;
+        exit(1);
+    }
+
+    // username
+    string name = getNthWord(line, 3);
+    user->name = strdup(name.c_str());
+
+    // login
+    key = login_1(user, handle);
+    cout << "Received key from server: " << *key << endl;
+    if(*key == 0) {
+        cout << "USER " << user->name << " ALREADY LOGGED IN" << endl;
+        exit(1);
+    }
+
+    getline(cin, line);
+    if(line.compare(0, 4, "load") == 0)
+        load_data = true;
+
+    // load
+    if(load_data) {
+        resp = load_1(key, handle);
+        cout << resp->resp << endl;
+    } else {
+        parse_line(line);
+    }
+
+	while(getline(cin, line)) {
+
+        // store
+        parse_line(line);
     }
 	
 	return 0;

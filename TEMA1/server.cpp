@@ -15,16 +15,18 @@
 
 #include "rpcdb.h"
 
+
 using namespace std;
 
 const char *ACK = "OK";
 const char *NACK = "CONNECTION DENIED";
 unsigned long contor = 1;
+unsigned long err = 0;
 
 map<string, unsigned long> users;
 map<string, vector<struct sensor_data>> database;
 
-unordered_set<string> filenames;
+vector<string> filenames;
 
 bool user_exists(string name) {
     map<string , unsigned long>::iterator it;
@@ -33,16 +35,8 @@ bool user_exists(string name) {
 }
 
 bool filename_exists(string name) {
-    return filenames.find(name) != filenames.end();
+    return find(filenames.begin(), filenames.end(), name) != filenames.end();
 }
-
-struct find_id : std::unary_function<struct sensor_data, bool> {
-    int id;
-    find_id(int data_id):id(id) { }
-    bool operator()(struct sensor_data const data) const {
-        return data.data_id == id;
-    }
-};
 
 bool data_id_exists(int data_id, string filename) {
     return find_if (database[filename].begin(), 
@@ -132,7 +126,6 @@ void del_entry(int data_id, string filename) {
         }
         i++;
     }
-    //cout << "Data not found" << endl;
 }
 
 void update_entry(struct sensor_data data_updated, string filename) {
@@ -146,7 +139,6 @@ void update_entry(struct sensor_data data_updated, string filename) {
         }
         i++;
     }
-    //cout << "Data not found for update" << endl;
 }
 
 string read_entry(int data_id, string filename) {
@@ -167,7 +159,6 @@ string read_entry(int data_id, string filename) {
         i++;
     }
     return s;
-    //cout << "Data not found" << endl;
 }
 
 float mean(float a[], int n)
@@ -276,16 +267,27 @@ string get_all_stats(string filename) {
     return res;
 }
 
+void end_session(string name, string filename) {
+    map<string, vector<struct sensor_data>>::iterator it;
+    it = database.find(filename);
+    database.erase (it, database.end());
+
+    map<string , unsigned long>::iterator it2;
+    it2 = users.find(name);
+    users.erase (it2, users.end());
+}
+
 unsigned long* login_1_svc(username* user, struct svc_req *cl) {
     static unsigned long res = 0;
     if(user_exists(string(user->name)))
-        cout << "USER " << user->name << " ALREADY LOGGED IN" << endl;
-    else {
-        // add user in map
-        users[user->name] = contor;
-        res = contor;
-        contor++;
+    {
+        return &err;
     }
+    // add user in map
+    users[user->name] = contor;
+    res = contor;
+    contor++;
+
     return &res;
 }
 
@@ -296,11 +298,10 @@ response* load_1_svc(unsigned long *key, struct svc_req *cl) {
     DIR *dir; struct dirent *diread;
     string file = name + ".dbms";
 
-    if ((dir = opendir("./database")) != nullptr) {
-        while ((diread = readdir(dir)) != nullptr
-                && (string(diread->d_name)).compare(".") != 0
-                && (string(diread->d_name)).compare("..")) {
-            filenames.insert(string(diread->d_name));
+    if ((dir = opendir("./database/")) != NULL) {
+        while ((diread = readdir(dir)) != NULL)
+        {
+            filenames.push_back(string(diread->d_name));
         }
         closedir (dir);
     } else {
@@ -311,8 +312,9 @@ response* load_1_svc(unsigned long *key, struct svc_req *cl) {
     // user file doesn't exist on disk yet
     if(!filename_exists(file)) {
         add_file(file);
-    } else
+    } else {
         load_file(file);
+    }
     resp->resp = strdup("LOAD DONE");
     return resp;
 }
@@ -423,5 +425,15 @@ response* get_stat_all_1_svc(unsigned long *key, struct svc_req *cl) {
     
     string res = get_all_stats(file);
     resp->resp = strdup(res.c_str());
+    return resp;
+}
+
+response* logout_1_svc(unsigned long *key, struct svc_req *cl) {
+	response *resp = (response *) malloc (sizeof(response));
+    string name = get_user(key);
+    string file = name + ".dbms";
+    
+    end_session(name, file);
+    resp->resp = strdup("BYE");
     return resp;
 }

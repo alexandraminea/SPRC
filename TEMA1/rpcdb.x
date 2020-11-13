@@ -37,5 +37,6 @@ program RPCDB_PROG {
         response read(read_data) = 7;
         response get_stat(read_data) = 8;
         response get_stat_all(unsigned long) = 9;
+        response logout(unsigned long) = 10;
 	} = 1;
 } = 1;

@@ -143,3 +143,18 @@ get_stat_all_1(u_long *argp, CLIENT *clnt)
 	}
 	return (&clnt_res);
 }
+
+response *
+logout_1(u_long *argp, CLIENT *clnt)
+{
+	static response clnt_res;
+
+	memset((char *)&clnt_res, 0, sizeof(clnt_res));
+	if (clnt_call (clnt, logout,
+		(xdrproc_t) xdr_u_long, (caddr_t) argp,
+		(xdrproc_t) xdr_response, (caddr_t) &clnt_res,
+		TIMEOUT) != RPC_SUCCESS) {
+		return (NULL);
+	}
+	return (&clnt_res);
+}

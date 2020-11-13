@@ -47,6 +47,8 @@
         "iterator": "cpp",
         "memory_resource": "cpp",
         "random": "cpp",
-        "set": "cpp"
+        "set": "cpp",
+        "list": "cpp",
+        "forward_list": "cpp"
     }
 }
