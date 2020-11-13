@@ -171,6 +171,9 @@ int main(int argc, char *argv[]){
 
             resp = get_stat_1(&data, handle);
             cout << resp->resp << endl;
+        } else if (!line.compare(0, 9, "get_stat_")) {
+            resp = get_stat_all_1(key, handle);
+            cout << resp->resp << endl;
         }
     }
 	

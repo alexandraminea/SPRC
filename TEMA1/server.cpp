@@ -256,6 +256,26 @@ string get_median(int data_id, string filename) {
     return s;
 }
 
+string get_one_stat(int data_id, string file) {
+    return "STATS FOR ID: " + to_string(data_id)
+        + "\n"
+        + "MIN: " + get_min(data_id, file)
+        + "\nMAX: " + get_max(data_id, file)
+        + "\nMEAN: " + get_mean(data_id, file)
+        + "\nMEDIAN: " + get_median(data_id, file)
+        + "\n";
+}
+
+string get_all_stats(string filename) {
+    string res;
+    for(auto data : database[filename]) {
+        string s = get_one_stat(data.data_id, filename);
+        res += s;
+    }
+
+    return res;
+}
+
 unsigned long* login_1_svc(username* user, struct svc_req *cl) {
     static unsigned long res = 0;
     if(user_exists(string(user->name)))
@@ -388,13 +408,20 @@ response* get_stat_1_svc(struct read_data* data, struct svc_req *cl) {
     string file = name + ".dbms";
     
     if(data_id_exists(data_id, file)) {
-        string s = "MIN: " + get_min(data_id, file)
-                    + "\nMAX: " + get_max(data_id, file)
-                    + "\nMEAN: " + get_mean(data_id, file)
-                    + "\nMEDIAN: " + get_median(data_id, file);
+        string s = get_one_stat(data_id, file);
         resp->resp = strdup(s.c_str());
         return resp;
     }
     resp->resp = strdup("NO SUCH DATA");
+    return resp;
+}
+
+response* get_stat_all_1_svc(unsigned long *key, struct svc_req *cl) {
+	response *resp = (response *) malloc (sizeof(response));
+    string name = get_user(key);
+    string file = name + ".dbms";
+    
+    string res = get_all_stats(file);
+    resp->resp = strdup(res.c_str());
     return resp;
 }
