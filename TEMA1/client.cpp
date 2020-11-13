@@ -101,10 +101,75 @@ int main(int argc, char *argv[]){
             data.key = *key;
             data.data = val;
 
-            // for(int i = 0; i < n; i++)
-            //     cout << data.data.values.values_val[i] << endl;
-
             resp = add_1(&data, handle);
+            cout << resp->resp << endl;
+        }
+        else if (!line.compare(0, 3, "del")) {
+            istringstream iss(line);
+            int id;
+            struct del_data data;
+            
+            // build struct sensor_data
+            string word;
+            iss >> word >> id;
+            
+            //build struct user data
+            data.key = *key;
+            data.data_id = id;
+
+            resp = del_1(&data, handle);
+            cout << resp->resp << endl;
+        } else if (!line.compare(0, 6, "update")) {
+            istringstream iss(line);
+            int id, n;
+            struct sensor_data val;
+            struct user_data data;
+            
+            // build struct sensor_data
+            string word;
+            iss >> word >> id >> n;
+            // cout << n << endl;
+            val.values.values_val = (float *) malloc (n * sizeof (float));
+            for (int i = 0 ; i < n ; i++)
+                iss >> val.values.values_val[i];
+            val.data_id = id;
+            val.values.values_len = n;
+            
+            //build struct user data
+            data.key = *key;
+            data.data = val;
+
+            resp = update_1(&data, handle);
+            cout << resp->resp << endl;
+        } else if (!line.compare(0, 4, "read")) {
+            istringstream iss(line);
+            int id;
+            struct read_data data;
+            
+            // build struct sensor_data
+            string word;
+            iss >> word >> id;
+            
+            //build struct user data
+            data.key = *key;
+            data.data_id = id;
+
+            resp = read_1(&data, handle);
+            cout << resp->resp << endl;
+        } else if (!line.compare(0, 8, "get_stat") && line[8] != '_') {
+            istringstream iss(line);
+            int id;
+            struct read_data data;
+            
+            // build struct sensor_data
+            string word;
+            iss >> word >> id;
+            
+            //build struct user data
+            data.key = *key;
+            data.data_id = id;
+
+            resp = get_stat_1(&data, handle);
             cout << resp->resp << endl;
         }
     }

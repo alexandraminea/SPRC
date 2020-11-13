@@ -68,3 +68,63 @@ add_1(user_data *argp, CLIENT *clnt)
 	}
 	return (&clnt_res);
 }
+
+response *
+del_1(del_data *argp, CLIENT *clnt)
+{
+	static response clnt_res;
+
+	memset((char *)&clnt_res, 0, sizeof(clnt_res));
+	if (clnt_call (clnt, del,
+		(xdrproc_t) xdr_del_data, (caddr_t) argp,
+		(xdrproc_t) xdr_response, (caddr_t) &clnt_res,
+		TIMEOUT) != RPC_SUCCESS) {
+		return (NULL);
+	}
+	return (&clnt_res);
+}
+
+response *
+update_1(user_data *argp, CLIENT *clnt)
+{
+	static response clnt_res;
+
+	memset((char *)&clnt_res, 0, sizeof(clnt_res));
+	if (clnt_call (clnt, update,
+		(xdrproc_t) xdr_user_data, (caddr_t) argp,
+		(xdrproc_t) xdr_response, (caddr_t) &clnt_res,
+		TIMEOUT) != RPC_SUCCESS) {
+		return (NULL);
+	}
+	return (&clnt_res);
+}
+
+response *
+read_1(read_data *argp, CLIENT *clnt)
+{
+	static response clnt_res;
+
+	memset((char *)&clnt_res, 0, sizeof(clnt_res));
+	if (clnt_call (clnt, read,
+		(xdrproc_t) xdr_read_data, (caddr_t) argp,
+		(xdrproc_t) xdr_response, (caddr_t) &clnt_res,
+		TIMEOUT) != RPC_SUCCESS) {
+		return (NULL);
+	}
+	return (&clnt_res);
+}
+
+response *
+get_stat_1(read_data *argp, CLIENT *clnt)
+{
+	static response clnt_res;
+
+	memset((char *)&clnt_res, 0, sizeof(clnt_res));
+	if (clnt_call (clnt, get_stat,
+		(xdrproc_t) xdr_read_data, (caddr_t) argp,
+		(xdrproc_t) xdr_response, (caddr_t) &clnt_res,
+		TIMEOUT) != RPC_SUCCESS) {
+		return (NULL);
+	}
+	return (&clnt_res);
+}

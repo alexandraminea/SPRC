@@ -8,6 +8,16 @@ struct user_data {
     unsigned long key;
 };
 
+struct del_data {
+    int data_id;
+    unsigned long key;
+};
+
+struct read_data {
+    int data_id;
+    unsigned long key;
+};
+
 struct response {
     string resp<>;
 };
@@ -22,5 +32,9 @@ program RPCDB_PROG {
         response load(unsigned long) = 2;
         response store(unsigned long) = 3;
         response add(user_data) = 4;
+        response del(del_data) = 5;
+        response update(user_data) = 6;
+        response read(read_data) = 7;
+        response get_stat(read_data) = 8;
 	} = 1;
 } = 1;

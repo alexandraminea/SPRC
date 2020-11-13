@@ -31,6 +31,30 @@ xdr_user_data (XDR *xdrs, user_data *objp)
 }
 
 bool_t
+xdr_del_data (XDR *xdrs, del_data *objp)
+{
+	register int32_t *buf;
+
+	 if (!xdr_int (xdrs, &objp->data_id))
+		 return FALSE;
+	 if (!xdr_u_long (xdrs, &objp->key))
+		 return FALSE;
+	return TRUE;
+}
+
+bool_t
+xdr_read_data (XDR *xdrs, read_data *objp)
+{
+	register int32_t *buf;
+
+	 if (!xdr_int (xdrs, &objp->data_id))
+		 return FALSE;
+	 if (!xdr_u_long (xdrs, &objp->key))
+		 return FALSE;
+	return TRUE;
+}
+
+bool_t
 xdr_response (XDR *xdrs, response *objp)
 {
 	register int32_t *buf;

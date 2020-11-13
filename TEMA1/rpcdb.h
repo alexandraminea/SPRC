@@ -29,6 +29,18 @@ struct user_data {
 };
 typedef struct user_data user_data;
 
+struct del_data {
+	int data_id;
+	u_long key;
+};
+typedef struct del_data del_data;
+
+struct read_data {
+	int data_id;
+	u_long key;
+};
+typedef struct read_data read_data;
+
 struct response {
 	char *resp;
 };
@@ -55,6 +67,18 @@ extern  response * store_1_svc(u_long *, struct svc_req *);
 #define add 4
 extern  response * add_1(user_data *, CLIENT *);
 extern  response * add_1_svc(user_data *, struct svc_req *);
+#define del 5
+extern  response * del_1(del_data *, CLIENT *);
+extern  response * del_1_svc(del_data *, struct svc_req *);
+#define update 6
+extern  response * update_1(user_data *, CLIENT *);
+extern  response * update_1_svc(user_data *, struct svc_req *);
+#define read 7
+extern  response * read_1(read_data *, CLIENT *);
+extern  response * read_1_svc(read_data *, struct svc_req *);
+#define get_stat 8
+extern  response * get_stat_1(read_data *, CLIENT *);
+extern  response * get_stat_1_svc(read_data *, struct svc_req *);
 extern int rpcdb_prog_1_freeresult (SVCXPRT *, xdrproc_t, caddr_t);
 
 #else /* K&R C */
@@ -70,6 +94,18 @@ extern  response * store_1_svc();
 #define add 4
 extern  response * add_1();
 extern  response * add_1_svc();
+#define del 5
+extern  response * del_1();
+extern  response * del_1_svc();
+#define update 6
+extern  response * update_1();
+extern  response * update_1_svc();
+#define read 7
+extern  response * read_1();
+extern  response * read_1_svc();
+#define get_stat 8
+extern  response * get_stat_1();
+extern  response * get_stat_1_svc();
 extern int rpcdb_prog_1_freeresult ();
 #endif /* K&R C */
 
@@ -78,12 +114,16 @@ extern int rpcdb_prog_1_freeresult ();
 #if defined(__STDC__) || defined(__cplusplus)
 extern  bool_t xdr_sensor_data (XDR *, sensor_data*);
 extern  bool_t xdr_user_data (XDR *, user_data*);
+extern  bool_t xdr_del_data (XDR *, del_data*);
+extern  bool_t xdr_read_data (XDR *, read_data*);
 extern  bool_t xdr_response (XDR *, response*);
 extern  bool_t xdr_username (XDR *, username*);
 
 #else /* K&R C */
 extern bool_t xdr_sensor_data ();
 extern bool_t xdr_user_data ();
+extern bool_t xdr_del_data ();
+extern bool_t xdr_read_data ();
 extern bool_t xdr_response ();
 extern bool_t xdr_username ();
 

@@ -10,6 +10,7 @@
 #include <vector>
 #include <dirent.h>
 #include <unordered_set>
+#include <algorithm>
 
 
 #include "rpcdb.h"
@@ -18,27 +19,36 @@ using namespace std;
 
 const char *ACK = "OK";
 const char *NACK = "CONNECTION DENIED";
-unsigned long count = 1;
+unsigned long contor = 1;
 
 map<string, unsigned long> users;
 map<string, vector<struct sensor_data>> database;
 
 unordered_set<string> filenames;
 
-bool search_user(string name) {
+bool user_exists(string name) {
     map<string , unsigned long>::iterator it;
     it = users.find(name);
     return it != users.end();
 }
 
-bool search_db_for_user(string name) {
-    map<string , vector<struct sensor_data>>::iterator it;
-    it = database.find(name);
-    return it != database.end();
+bool filename_exists(string name) {
+    return filenames.find(name) != filenames.end();
 }
 
-bool search_filename(string name) {
-    return filenames.find(name) != filenames.end();
+struct find_id : std::unary_function<struct sensor_data, bool> {
+    int id;
+    find_id(int data_id):id(id) { }
+    bool operator()(struct sensor_data const data) const {
+        return data.data_id == id;
+    }
+};
+
+bool data_id_exists(int data_id, string filename) {
+    return find_if (database[filename].begin(), 
+                    database[filename].end(), 
+                    [&](const struct sensor_data &f) 
+                    { return f.data_id == data_id; }) != database[filename].end();
 }
 
 void add_file(string filename) {
@@ -61,7 +71,7 @@ void load_file(string filename) {
     while(getline(f, line)) {
 
         istringstream iss(line);
-        //cout << line << endl;
+
         // create entry in db
         struct sensor_data val;
         iss >> id >> n;
@@ -73,8 +83,9 @@ void load_file(string filename) {
         val.data_id = id;
         val.values.values_len = n;
 
-        //add entry to temporary db
-        database[filename].push_back(val);
+        //add entry to temporary if it doesn't exist
+        if(!data_id_exists(id, filename))
+            database[filename].push_back(val);
     }
     f.close();
 }
@@ -92,7 +103,7 @@ string get_user(unsigned long *key) {
 
 void store_file(string filename) {
     string path = "./database/" + filename;
-    ofstream f(path.c_str());
+    ofstream f(path.c_str(), ofstream::trunc);
     vector<struct sensor_data> v = database[filename];
     for(int i = 0; i < v.size(); i++)
     {   
@@ -110,15 +121,150 @@ void add_data(string filename, struct sensor_data data) {
     database[filename].push_back(data);        
 }
 
+void del_entry(int data_id, string filename) {
+    
+    int i = 0;
+    for(auto data : database[filename]) {
+        if(data.data_id == data_id) {
+            free(data.values.values_val);
+            database[filename].erase(database[filename].begin() + i);
+            return;
+        }
+        i++;
+    }
+    //cout << "Data not found" << endl;
+}
+
+void update_entry(struct sensor_data data_updated, string filename) {
+    
+    int i = 0;
+    for(auto data : database[filename]) {
+        if(data.data_id == data_updated.data_id) {
+            int len = data_updated.values.values_len;
+            memcpy(data.values.values_val, data_updated.values.values_val, len * sizeof(float));
+            return;
+        }
+        i++;
+    }
+    //cout << "Data not found for update" << endl;
+}
+
+string read_entry(int data_id, string filename) {
+    
+    int i = 0;
+    string s;
+    for(auto data : database[filename]) {
+        if(data.data_id == data_id) {
+            ostringstream os;
+            int len = data.values.values_len;
+            for (int i = 0 ; i < len; i++) {
+                os << data.values.values_val[i] << " " ;
+            }
+            string str(os.str());
+            s = str;
+            return s;
+        }
+        i++;
+    }
+    return s;
+    //cout << "Data not found" << endl;
+}
+
+float mean(float a[], int n)
+{
+    float sum = 0.0f;
+    for (int i = 0; i < n; i++)
+        sum += a[i];
+
+    return sum / n;
+}
+
+float median(float a[], int n)
+{
+    sort(a, a + n);
+    if (n % 2 != 0)
+        return (double)a[n / 2];
+
+    return (double)(a[(n-1)/2] + a[n/2]) / 2;
+}
+
+string get_min(int data_id, string filename) {
+    int i = 0;
+    string s;
+    for(auto data : database[filename]) {
+        if(data.data_id == data_id) {
+            int len = data.values.values_len;
+            float* m = min_element(data.values.values_val, data.values.values_val + len);
+            ostringstream os;
+            os << *m;
+            string str(os.str());
+            return str;
+        }
+        i++;
+    }
+    return s;
+}
+
+string get_max(int data_id, string filename) {
+    int i = 0;
+    string s;
+    for(auto data : database[filename]) {
+        if(data.data_id == data_id) {
+            int len = data.values.values_len;
+            float* m = max_element(data.values.values_val, data.values.values_val + len);
+            ostringstream os;
+            os << *m;
+            string str(os.str());
+            return str;
+        }
+        i++;
+    }
+    return s;
+}
+
+string get_mean(int data_id, string filename) {
+    int i = 0;
+    string s;
+    for(auto data : database[filename]) {
+        if(data.data_id == data_id) {
+            int len = data.values.values_len;
+            float m = mean(data.values.values_val, len);
+            ostringstream os;
+            os << m;
+            string str(os.str());
+            return str;
+        }
+        i++;
+    }
+    return s;
+}
+
+string get_median(int data_id, string filename) {
+    int i = 0;
+    string s;
+    for(auto data : database[filename]) {
+        if(data.data_id == data_id) {
+            int len = data.values.values_len;
+            float m = median(data.values.values_val, len);
+            ostringstream os;
+            os << m;
+            string str(os.str());
+            return str;
+        }
+        i++;
+    }
+    return s;
+}
+
 unsigned long* login_1_svc(username* user, struct svc_req *cl) {
     static unsigned long res = 0;
-    if(search_user(string(user->name)))
+    if(user_exists(string(user->name)))
         cout << "USER " << user->name << " ALREADY LOGGED IN" << endl;
     else {
         // add user in map
-        users[user->name] = count;
-        res = count;
-        count++;
+        users[user->name] = contor;
+        res = contor;
+        contor++;
     }
     return &res;
 }
@@ -143,7 +289,7 @@ response* load_1_svc(unsigned long *key, struct svc_req *cl) {
     }
 
     // user file doesn't exist on disk yet
-    if(!search_filename(file)) {
+    if(!filename_exists(file)) {
         add_file(file);
     } else
         load_file(file);
@@ -155,20 +301,25 @@ response* add_1_svc(struct user_data *data, struct svc_req *cl) {
 	response *resp = (response *) malloc (sizeof(response));
     unsigned long key = data->key;
     string name = get_user(&key);
-
-    // copy the sensor data into a db entry
-    struct sensor_data entry = data->data;
-
-    // deep copy of float*
-    entry.values.values_val = (float *)malloc(entry.values.values_len *sizeof(float));
-    memcpy(entry.values.values_val, data->data.values.values_val, entry.values.values_len *sizeof(float));
-
-
     string file = name + ".dbms";
 
-    // add entry in local db (in memory)
-    add_data(file, entry);
-    resp->resp = strdup("DATA ADDED");
+    // check if data is already added
+    if(!data_id_exists(data->data.data_id, file)) {
+
+        // copy the sensor data into a db entry
+        struct sensor_data entry = data->data;
+        int len = entry.values.values_len;
+
+        // deep copy of float*
+        entry.values.values_val = (float *)malloc(len *sizeof(float));
+        memcpy(entry.values.values_val, data->data.values.values_val, len *sizeof(float));
+
+        // add entry in local db (in memory)
+        add_data(file, entry);
+        resp->resp = strdup("DATA ADDED");
+        return resp;
+    }
+    resp->resp = strdup("DATA ALREADY ADDED");
     return resp;
 }
 
@@ -178,5 +329,72 @@ response* store_1_svc(unsigned long *key, struct svc_req *cl) {
     string file = name + ".dbms";
     store_file(file);
     resp->resp = strdup("DB STORED");
+    return resp;
+}
+
+response* del_1_svc(struct del_data* data, struct svc_req *cl) {
+	response *resp = (response *) malloc (sizeof(response));
+    unsigned long key = data->key;
+    int data_id = data->data_id;
+    string name = get_user(&key);
+    string file = name + ".dbms";
+
+    if(data_id_exists(data_id, file)) {
+        del_entry(data_id, file);
+        resp->resp = strdup("DATA DELETED");
+        return resp;
+    }
+    resp->resp = strdup("NO SUCH DATA");
+    return resp;
+}
+
+response* update_1_svc(struct user_data* data, struct svc_req *cl) {
+	response *resp = (response *) malloc (sizeof(response));
+    unsigned long key = data->key;
+    struct sensor_data entry = data->data;
+    string name = get_user(&key);
+    string file = name + ".dbms";
+    
+    if(data_id_exists(data->data.data_id, file)) {
+        update_entry(entry, file);
+        resp->resp = strdup("DATA UPDATED");
+        return resp;
+    }
+    resp->resp = strdup("NO SUCH DATA");
+    return resp;
+}
+
+response* read_1_svc(struct read_data* data, struct svc_req *cl) {
+	response *resp = (response *) malloc (sizeof(response));
+    unsigned long key = data->key;
+    int data_id = data->data_id;
+    string name = get_user(&key);
+    string file = name + ".dbms";
+    
+    if(data_id_exists(data_id, file)) {
+        string s = "VALUES: " + read_entry(data_id, file);
+        resp->resp = strdup(s.c_str());
+        return resp;
+    }
+    resp->resp = strdup("NO SUCH DATA");
+    return resp;
+}
+
+response* get_stat_1_svc(struct read_data* data, struct svc_req *cl) {
+	response *resp = (response *) malloc (sizeof(response));
+    unsigned long key = data->key;
+    int data_id = data->data_id;
+    string name = get_user(&key);
+    string file = name + ".dbms";
+    
+    if(data_id_exists(data_id, file)) {
+        string s = "MIN: " + get_min(data_id, file)
+                    + "\nMAX: " + get_max(data_id, file)
+                    + "\nMEAN: " + get_mean(data_id, file)
+                    + "\nMEDIAN: " + get_median(data_id, file);
+        resp->resp = strdup(s.c_str());
+        return resp;
+    }
+    resp->resp = strdup("NO SUCH DATA");
     return resp;
 }
