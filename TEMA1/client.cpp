@@ -14,11 +14,11 @@ CLIENT *handle;
 string filename = "";
 char **res;
 unsigned long *key;
-username *user;
-response *resp;
+static username *user;
 
 void parse_line(string line) {
-            if (!line.compare("store")) {
+        response *resp;
+        if (!line.compare("store")) {
             resp = store_1(key, handle);
             cout << resp->resp << endl;
         }
@@ -44,6 +44,8 @@ void parse_line(string line) {
 
             resp = add_1(&data, handle);
             cout << resp->resp << endl;
+
+            free(val.values.values_val);
         }
         else if (!line.compare(0, 3, "del")) {
             istringstream iss(line);
@@ -82,6 +84,9 @@ void parse_line(string line) {
 
             resp = update_1(&data, handle);
             cout << resp->resp << endl;
+
+            free(val.values.values_val);
+
         } else if (!line.compare(0, 4, "read")) {
             istringstream iss(line);
             int id;
@@ -97,6 +102,7 @@ void parse_line(string line) {
 
             resp = read_1(&data, handle);
             cout << resp->resp << endl;
+
         } else if (!line.compare(0, 8, "get_stat") && line[8] != '_') {
             istringstream iss(line);
             int id;
@@ -112,12 +118,14 @@ void parse_line(string line) {
 
             resp = get_stat_1(&data, handle);
             cout << resp->resp << endl;
+
         } else if (!line.compare(0, 9, "get_stat_")) {
             resp = get_stat_all_1(key, handle);
             cout << resp->resp << endl;
         } else if (!line.compare(0, 6, "logout")) {
             resp = logout_1(key, handle);
             cout << resp->resp << endl;
+            clnt_destroy(handle);
             exit(0);
         } else if(line.compare(0, 4, "load") == 0) {
             cout << "LOAD HAS NO EFFECT\n";
@@ -139,32 +147,28 @@ int main(int argc, char *argv[]){
 	/* variabila clientului */
     
     string filename = "";
-    string commands_file = "commands.txt";
-    ifstream fcom(commands_file);
-	
-	
+		
 	handle=clnt_create(
-		RMACHINE,		/* numele masinii unde se afla server-ul */
-		RPCDB_PROG,		/* numele programului disponibil pe server */
-		RPCDB_VERS,		/* versiunea programului */
-		"tcp");			/* tipul conexiunii client-server */
+		RMACHINE,
+		RPCDB_PROG,
+		RPCDB_VERS,
+		"tcp");
 	
 	if(handle == NULL) {
 		perror("");
 		return -1;
 	}
 
-    user = (username *) malloc(sizeof(username));
-    resp = (response *) malloc (sizeof(response)); 
+    response *resp;
+    user = (username *) malloc(sizeof(username)); 
 
     bool load_data = false;
     string line;
     getline(cin, line);
-    cout << line << endl;
 
     if(line.compare(0, 5, "login") != 0)
     {
-        cout << "You must login first: login <username>" << endl;
+        cout << "YOU MUST LOGIN FIRST: login <USERNAME>" << endl;
         exit(1);
     }
 
@@ -174,7 +178,9 @@ int main(int argc, char *argv[]){
 
     // login
     key = login_1(user, handle);
-    cout << "Received key from server: " << *key << endl;
+    free(user->name);
+    free(user);
+    cout << "RECEIVED KEY: " << *key << endl;
     if(*key == 0) {
         cout << "USER " << user->name << " ALREADY LOGGED IN" << endl;
         exit(1);
@@ -193,10 +199,8 @@ int main(int argc, char *argv[]){
     }
 
 	while(getline(cin, line)) {
-
-        // store
         parse_line(line);
     }
-	
+
 	return 0;
 }

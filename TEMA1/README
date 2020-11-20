@@ -1,0 +1,16 @@
+Alexandra Minea 342C3
+
+
+Rulare:
+make
+server : ./server
+client: ./client
+
+Clientul asteapta de la server comenzile indicate in enunt. In cazul in care
+primeste o comanda gresita se va semnala clientului acest lucru.
+
+Detaliile legate de teste si ce anume verifica ele in mod particular sunt in
+fisierul README din folderul tests.
+
+
+

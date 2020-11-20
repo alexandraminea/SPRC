@@ -1,0 +1,13 @@
+login user2
+load
+read 2233
+update 20 3 1.1 2.2 3.3
+read 20
+add 444 3 1.22 1.33 1.44
+get_stat 444
+del 20
+get_stat_all
+store
+del 1234
+store
+logout
