@@ -1,0 +1,17 @@
+login user2
+add 3 4 0.51 0.59 0.34 0.69
+add 20 3 0.02 0.03 0.04
+add 2233 5 1.2 1.3 1.4 1.5 1.99
+load
+get_stat 2233
+read 20
+del 20
+update 1234 3 0.44 0.55 0.66
+add 1234 3 6.5 7.3 8.6
+update 1234 3 0.44 0.55 0.66
+read 1234
+get_stat_all
+store
+del 12
+exit
+logout

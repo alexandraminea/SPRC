@@ -1,0 +1,31 @@
+ --> basic_tests_1:
+	- in acest set de date se poate observa comportamentul normal al serverului
+	(atunci cand inputul este corect) pentru toate tipurile de comenzi, dar 
+	si in urmatoarele cazuri speciale:
+		- se incearca adaugarea de valori la un id deja existent
+		- se incerca read/ update dupa ce un element a fost sters
+		- (accesare date inexistente)
+
+ --> basic_tests_2:
+	- in acest set de comenzi am dorit sa evidentiez urmatoarele comportamente:
+		- nu se face load la inceput => datele sunt pastrate in memoria locala
+		a serverului pana ce intalneste logout
+		- datele din memorie sunt suprascrise in fisierul de pe disk la 
+		intalnirea unui store
+		- o incercare ulterioara a apelarii comenzii load => esec si mesaj de eroare
+		- comanda scrisa gresit => se afiseaza lista de comenzi acceptate
+	
+--> basic_tests_3:
+	- in acest set de comenzi am dorit sa evidentiez urmatoarele comportamente:
+		- logarea a doua oara a unui user care are deja o baza de date pastrata
+		pe disk => comanda load va incarca datele in memoria locala a serverului,
+		iar clientul poate face operatii pe ele
+		- la store se suprascrie continutul fisierului de pe disk cu datele din
+		memorie
+		- comenzile date dupa store au efect doar in memorie (pana la intalnirea
+		urmatorului store - daca exista)
+		
+
+Pentru testare, inafara testelor basic propuse de mine se pot testa scenarii precum:
+	- incercarea de logare a unui user deja logat => mesaj de eroare
+	- conectarea simultana a mai multor useri
