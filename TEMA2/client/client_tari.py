@@ -31,6 +31,7 @@ def check_test(expected, got):
         print(f"EXPECTED {expected} and got {got} ......... NOT OK")
 
 # /api/countries ---------------------------------------------------------------------------
+
 print(" -------------------- Testing /api/countries -------------------- ")
 print(" -------------------- POST -------------------")
 # POST

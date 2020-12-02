@@ -1,0 +1,33 @@
+Minea Alexandra 342C3 - TEMA 2
+
+Rulare:
+    In radacina proiectului:
+    $ docker-compose up
+
+Structura si design:
+    Pyhton - Flask/SQLAlchemy + MySQL
+    Priectul are 2 componente importante: baza de date(MySQL) si API-ul pentru gestiunea cererilor.
+    Baza de date:
+        Am ales sa folosesc serverul de MySQL, deoarece am mai lucrat cu el si in alte aplicatii.
+        Baza de date este initializata de baza unui script: db/init.sql.
+        Gestiunea acesteia se realizeaza cu ajutorul unui ORM (SQLAlchemy).
+    API gestiune:
+        Pentru fiecare ruta in parte (specificata in enunt) se trateaza cazurile de eroare si se updateaza
+        rezultatele in baza de date (acolo unde este cazul).
+        Observatii:
+            - Timestamp-ul pentru temperaturi se salveaza in baza de date in format YYYY-MM-DD HH:MM:ss =>
+            atunci cand se face o verificare pentru temperaturi inregistrate pana la o anumita data, aceasta
+            nu va include ziua respectiva. (ex: pana la 2020-12-02 inseamna pana la 2020-12-02 00:00:00)
+
+    Docker:
+        docker-compose.yml:
+            - (db) = baza de bate
+                - pentru persistenta datelor folosesc volumul mysql_data
+                - pentru initializare: ./db:/docker-entrypoint-initdb.d
+
+            - app = API-ul
+                - se face build din folderul app -> unde se afla Dockerfile-ul si requirements.txt
+
+Pentru testare am pus la dispozitie si un client scris in python (el nu se afla inclus in proiect).
+In el am incercat sa cuprind toate cazurile (de comportare normala/ eroare/ corner case-uri) de functionare
+a aplicatiei.
