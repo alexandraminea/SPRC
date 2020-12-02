@@ -1,0 +1,32 @@
+CREATE DATABASE countries_db;
+use countries_db;
+
+CREATE TABLE Country (
+  id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  country_name VARCHAR(30) NOT NULL UNIQUE,
+  latitude VARCHAR(10) NOT NULL,
+  longitude VARCHAR(10) NOT NULL
+);
+
+CREATE TABLE City (
+  id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  city_name VARCHAR(30) NOT NULL,
+  country_id INTEGER NOT NULL,
+  latitude VARCHAR(10) NOT NULL,
+  longitude VARCHAR(10) NOT NULL,
+  CONSTRAINT fk_country_id FOREIGN KEY (country_id) 
+  REFERENCES Country (id)
+  ON DELETE CASCADE,
+  CONSTRAINT Co_city UNIQUE (country_id, city_name)
+);
+
+CREATE TABLE Temperature (
+  id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+  value VARCHAR(10),
+  ts DATETIME DEFAULT CURRENT_TIMESTAMP,
+  city_id INTEGER NOT NULL,
+  CONSTRAINT fk_city_id FOREIGN KEY (city_id) 
+  REFERENCES City (id)
+  ON DELETE CASCADE,
+  CONSTRAINT City_Temp UNIQUE (city_id, ts)
+);
