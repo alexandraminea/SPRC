@@ -6,7 +6,7 @@ Rulare:
 
 Structura si design:
     Pyhton - Flask/SQLAlchemy + MySQL
-    Priectul are 2 componente importante: baza de date(MySQL) si API-ul pentru gestiunea cererilor.
+    Priectul are 3 componente importante: baza de date(MySQL), API-ul pentru gestiunea cererilor si utilitarul pentru baza de date.
     Baza de date:
         Am ales sa folosesc serverul de MySQL, deoarece am mai lucrat cu el si in alte aplicatii.
         Baza de date este initializata de baza unui script: db/init.sql.
@@ -21,11 +21,11 @@ Structura si design:
 
     Docker:
         docker-compose.yml:
-            - (db) = baza de bate
+            - db = baza de bate
                 - pentru persistenta datelor folosesc volumul mysql_data
                 - pentru initializare: ./db:/docker-entrypoint-initdb.d
 
-            - app = API-ul
+            - server = API-ul
                 - se face build din folderul app -> unde se afla Dockerfile-ul si requirements.txt
 
             - adminer -> utilitarul pentru daza de date
