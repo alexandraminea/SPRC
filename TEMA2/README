@@ -11,7 +11,7 @@ Structura si design:
         Am ales sa folosesc serverul de MySQL, deoarece am mai lucrat cu el si in alte aplicatii.
         Baza de date este initializata de baza unui script: db/init.sql.
         Gestiunea acesteia se realizeaza cu ajutorul unui ORM (SQLAlchemy).
-    API gestiune:
+    API gestiune: (app/app.py)
         Pentru fiecare ruta in parte (specificata in enunt) se trateaza cazurile de eroare si se updateaza
         rezultatele in baza de date (acolo unde este cazul).
         Observatii:
@@ -28,6 +28,25 @@ Structura si design:
             - app = API-ul
                 - se face build din folderul app -> unde se afla Dockerfile-ul si requirements.txt
 
+            - adminer -> utilitarul pentru daza de date
+                - accesibil pe localhost:8080
+                - username: root
+                - parola: root
+                - baza de date: countries_db
+            
+        retele:
+            - exista 2 retele: db-adminer si db-api(cu nume sugestive pentru separarea containerelor)
+            - numele containerelor: 
+                db -> database
+                server -> server
+                adminer -> adminer
+            - am testat configuratia dns cu urmatoarele comenzi:
+                $ docker exec -ti server ping database
+                $ docker exec -u 0 -ti adminer ping database
+
+        variabile de mediu:
+            - MYSQL_ROOT_PASSWORD: root (pentru baza de date)
+
 Pentru testare am pus la dispozitie si un client scris in python (el nu se afla inclus in proiect).
-In el am incercat sa cuprind toate cazurile (de comportare normala/ eroare/ corner case-uri) de functionare
+In el am incercat sa cuprind toate cazurile (comportare normala/ erori/ corner case-uri) de functionare
 a aplicatiei.

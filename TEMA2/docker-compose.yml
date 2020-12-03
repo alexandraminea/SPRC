@@ -2,6 +2,10 @@ version: "3"
 services:
   db:
     image: mysql:5.7
+    container_name: database
+    networks:
+      - db-adminer
+      - db-api
     ports:
       - "32000:3306"
     environment:
@@ -9,12 +13,29 @@ services:
     volumes:
       - ./db:/docker-entrypoint-initdb.d
       - mysql_data:/var/lib/mysql
+
   server:
     build: ./app
+    container_name: server
     links:
       - db
+    networks:
+      - db-api
     ports:
       - "5000:5000"
 
+  adminer:
+    image: adminer
+    container_name: adminer
+    networks:
+      - db-adminer
+    restart: always
+    ports:
+      - 8080:8080
+
 volumes:
   mysql_data:
+
+networks:
+  db-adminer:
+  db-api:
