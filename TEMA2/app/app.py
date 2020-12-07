@@ -28,8 +28,8 @@ class Country(db.Model):
     def to_json(self):
         return {'id':self.id, 
                 'nume':self.country_name,
-                'lat':self.latitude,
-                'lon':self.longitude}
+                'lat':float(self.latitude),
+                'lon':float(self.longitude)}
 
 
 class City(db.Model):
@@ -51,14 +51,14 @@ class City(db.Model):
         return {'id':int(self.id), 
                 'idTara':self.country_id,
                 'nume':self.city_name,
-                'lat':self.latitude,
-                'lon':self.longitude}
+                'lat':float(self.latitude),
+                'lon':float(self.longitude)}
 
     def to_json2(self):
         return {'id':int(self.id),
                 'nume':self.city_name,
-                'lat':self.latitude,
-                'lon':self.longitude}
+                'lat':float(self.latitude),
+                'lon':float(self.longitude)}
 
 class Temperature(db.Model):
     __tablename__ = "Temperature"
@@ -83,7 +83,12 @@ def check_country(country):
     if country  and "nume" in country \
                 and "lat" in country \
                 and "lon" in country:
-        return True
+        try:
+            float(country["lat"])
+            float(country["lon"])
+            return True
+        except ValueError:
+            return False
     return False
 
 def check_city(city):
@@ -91,7 +96,12 @@ def check_city(city):
                 and "nume" in city \
                 and "lat" in city \
                 and "lon" in city:
-        return True
+        try:
+            float(city["lat"])
+            float(city["lon"])
+            return True
+        except ValueError:
+            return False
     return False
 
 def check_temp(temp):
@@ -137,6 +147,10 @@ def countries_id_op(id):
     if request.method == "PUT":
         resp = request.json
         if(check_country(resp)):
+            if not resp["id"]:
+                return Response(status=400)
+            elif resp["id"] != id:
+                return Response(status=400)
             country = Country.query.filter_by(id=id).first()
             try:
                 country.country_name = resp["nume"]
@@ -195,6 +209,10 @@ def cities_id_op(id):
     if request.method == "PUT":
         resp = request.json
         if(check_city(resp)):
+            if not resp["id"]:
+                return Response(status=400)
+            elif resp["id"] != id:
+                return Response(status=400)
             city = City.query.filter_by(id=id).first()
             try:
                 city.country_id = int(resp["idTara"])
@@ -304,6 +322,8 @@ def temp_id_op(id):
     if request.method == "PUT":
         resp = request.json
         if(check_temp(resp)):
+            if not resp["id"] or resp["id"] != id:
+                return Response(status=400)
             city = City.query.filter_by(id=resp['idOras']).first()
             if not city:
                 return Response(status=404)
