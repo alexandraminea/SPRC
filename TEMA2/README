@@ -26,6 +26,7 @@ Structura si design:
                 - pentru initializare: ./db:/docker-entrypoint-initdb.d
 
             - server = API-ul
+                - accesibil pe localhost:5000
                 - se face build din folderul app -> unde se afla Dockerfile-ul si requirements.txt
 
             - adminer -> utilitarul pentru daza de date

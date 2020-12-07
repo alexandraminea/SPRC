@@ -110,11 +110,20 @@ got = r.status_code
 expected = 400
 check_test(expected=expected, got=got)
 
+# different ids
 data = {'id': '2',"nume" : "Romania", "lat" : '59.329324',  "lon" : '18.068582'}
 r = requests.put(URL_CO1, json=data)
 got = r.status_code
 expected = 400
 check_test(expected=expected, got=got)
+
+# string id
+data = {'id': 'aa',"nume" : "Romania", "lat" : '59.329324',  "lon" : '18.068582'}
+r = requests.put(URL_CO1, json=data)
+got = r.status_code
+expected = 400
+check_test(expected=expected, got=got)
+
 
 # country not found - 404
 data = {'id': '10', "nume" : "NoCountry", "lat" : '59.329324',  "lon" : '18.068582'}
@@ -194,6 +203,12 @@ check_test(expected=expected, got=got)
 
 # bad request - 400
 data = {"idTara" : '4', "lat" : '45.404698',  "lon" : '9.1076927'}
+r = requests.post(URL_CITIES, json=data)
+got = r.status_code
+expected = 400
+check_test(expected=expected, got=got)
+
+data = {"idTara" : 'abc', "nume" : "Milanoo", "lat" : '45.404698',  "lon" : '9.1076927'}
 r = requests.post(URL_CITIES, json=data)
 got = r.status_code
 expected = 400
@@ -411,6 +426,24 @@ expected = 400
 check_test(expected=expected, got=got)
 
 data = {'id': '2', "idOras" : '1', 'valoare' : '44.5644'}
+r = requests.put(URL_T1, json=data)
+got = r.status_code
+expected = 400
+check_test(expected=expected, got=got)
+
+data = {'id': 'ab', "idOras" : '1', 'valoare' : '44.5644'}
+r = requests.put(URL_T1, json=data)
+got = r.status_code
+expected = 400
+check_test(expected=expected, got=got)
+
+data = {'id': '1', "idOras" : 'abcd', 'valoare' : '44.5644'}
+r = requests.put(URL_T1, json=data)
+got = r.status_code
+expected = 400
+check_test(expected=expected, got=got)
+
+data = {'id': '1', "idOras" : '3', 'valoare' : 'banana'}
 r = requests.put(URL_T1, json=data)
 got = r.status_code
 expected = 400

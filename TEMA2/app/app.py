@@ -99,6 +99,7 @@ def check_city(city):
         try:
             float(city["lat"])
             float(city["lon"])
+            int(city["idTara"])
             return True
         except ValueError:
             return False
@@ -107,8 +108,21 @@ def check_city(city):
 def check_temp(temp):
     if temp  and "idOras" in temp \
                 and "valoare" in temp:
-        return True
+        try:
+            int(temp["idOras"])
+            float(temp["valoare"])
+            return True
+        except ValueError:
+            return False
     return False
+    
+def check_id(id):
+    try:
+        int(id)
+        return True
+    except ValueError:
+        return False
+
 
 @app.route("/")
 def index():
@@ -147,9 +161,7 @@ def countries_id_op(id):
     if request.method == "PUT":
         resp = request.json
         if(check_country(resp)):
-            if not resp["id"]:
-                return Response(status=400)
-            elif resp["id"] != id:
+            if not resp["id"] or resp["id"] != id or check_id(resp["id"]) == False:
                 return Response(status=400)
             country = Country.query.filter_by(id=id).first()
             try:
@@ -209,9 +221,7 @@ def cities_id_op(id):
     if request.method == "PUT":
         resp = request.json
         if(check_city(resp)):
-            if not resp["id"]:
-                return Response(status=400)
-            elif resp["id"] != id:
+            if not resp["id"] or resp["id"] != id or check_id(resp["id"]) == False:
                 return Response(status=400)
             city = City.query.filter_by(id=id).first()
             try:
@@ -322,7 +332,7 @@ def temp_id_op(id):
     if request.method == "PUT":
         resp = request.json
         if(check_temp(resp)):
-            if not resp["id"] or resp["id"] != id:
+            if not resp["id"] or resp["id"] != id or check_id(resp["id"]) == False:
                 return Response(status=400)
             city = City.query.filter_by(id=resp['idOras']).first()
             if not city:
