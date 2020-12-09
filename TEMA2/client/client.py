@@ -407,6 +407,16 @@ params={"lat" : '44',  "lon" : '26', 'from': '2021-12-02', 'until':'2021-12-09'}
 r = requests.get(URL_T, params=params)
 print(r.text)
 
+print("\nGET wrong lat (Country)")
+params={"lat" : 'abc',  "lon" : '26.102537', 'from': '2020-12-02', 'until':'2020-12-09'}
+r = requests.get(URL_T, params=params)
+print(r.text)
+
+print("\nGET wrong date format (City)")
+params={'lat':'44.426765', 'lon':'26.102537', 'from': '2020--12--02', 'until':'2020-12-05'}
+r = requests.get(URL_T, params=params)
+print(r.text)
+
 
 print()
 print(" -------------------- Testing /api/temperatures/id ---------------------------- ")
@@ -489,7 +499,13 @@ check_test(expected=expected, got=got)
 print("-------- GET /api/temperatures/cities/idOras -----------")
 
 print("\nGET only by until_date")
-params={'until':'2020-12-03'}
+params={'until':'2020-12-13'}
+
+r = requests.get(URL_TCIT1, params=params)
+print(r.text)
+
+print("\nGET wrong date")
+params={'until':'abcdef'}
 
 r = requests.get(URL_TCIT1, params=params)
 print(r.text)
@@ -497,11 +513,16 @@ print(r.text)
 print("------- GET /api/temperatures/countries/idTara ----------")
 
 print("\nGET by from_date and until_date")
-params={'from': '2020-12-01','until':'2020-12-03'}
+params={'from': '2020-12-01','until':'2020-12-13'}
 
 r = requests.get(URL_TCO2, params=params)
 print(r.text)
 
+print("\nGET wrong date format")
+params={'from': '2020-12-01','until':'abcdfe'}
+
+r = requests.get(URL_TCO2, params=params)
+print(r.text)
 
 print("\n------- TEST remove City cascade ----------")
 print("Remove City 1 => no temperature entries for City 1")

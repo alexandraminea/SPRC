@@ -73,8 +73,7 @@ class Temperature(db.Model):
         self.city_id = city_id
 
     def to_json(self):
-        return {'id':int(self.id), 
-                'idOras':self.city_id,
+        return {'id':int(self.id),
                 'valoare':float(self.value),
                 'timestamp':str(self.ts)}
 
@@ -123,6 +122,19 @@ def check_id(id):
     except ValueError:
         return False
 
+def check_float(val):
+    try:
+        float(val)
+        return True
+    except ValueError:
+        return False
+
+def check_date(date_text):
+    try:
+        datetime.datetime.strptime(date_text, '%Y-%m-%d')
+        return True
+    except ValueError:
+        return False
 
 @app.route("/")
 def index():
@@ -293,13 +305,13 @@ def get_temperature():
         )
 
     queries = []
-    if latitude:
+    if latitude and check_float(latitude):
         queries.append(City.latitude.cast(db.Float) == float(latitude))
-    if longitude:
+    if longitude and check_float(longitude):
         queries.append(City.longitude.cast(db.Float) == float(longitude))
-    if from_date:
+    if from_date and check_date(from_date) == True:
         queries.append(Temperature.ts >= datetime.datetime.strptime(from_date, '%Y-%m-%d'))
-    if to_date:
+    if to_date and check_date(to_date) == True:
         queries.append(Temperature.ts <= datetime.datetime.strptime(to_date, '%Y-%m-%d'))
 
     temperatures = db.session.query(Temperature). \
@@ -308,9 +320,9 @@ def get_temperature():
         all()
 
     queries = []
-    if latitude:
+    if latitude and check_float(latitude):
         queries.append(Country.latitude.cast(db.Float) == float(latitude))
-    if longitude:
+    if longitude and check_float(longitude):
         queries.append(Country.longitude.cast(db.Float) == float(longitude))
 
     temps = db.session.query(Temperature). \
@@ -367,9 +379,9 @@ def get_temp_city(city_id):
     queries = []
     queries.append(Temperature.city_id == city_id)
 
-    if from_date:
+    if from_date and check_date(from_date) == True:
         queries.append(Temperature.ts >= datetime.datetime.strptime(from_date, '%Y-%m-%d'))
-    if to_date:
+    if to_date and check_date(to_date) == True:
         queries.append(Temperature.ts <= datetime.datetime.strptime(to_date, '%Y-%m-%d'))
 
     temperatures = db.session.query(Temperature). \
@@ -389,9 +401,9 @@ def get_temp_country(country_id):
 
     queries = []
     queries.append(City.country_id == country_id)
-    if from_date:
+    if from_date and check_date(from_date):
         queries.append(Temperature.ts >= datetime.datetime.strptime(from_date, '%Y-%m-%d'))
-    if to_date:
+    if to_date and check_date(to_date):
         queries.append(Temperature.ts <= datetime.datetime.strptime(to_date, '%Y-%m-%d'))
 
 

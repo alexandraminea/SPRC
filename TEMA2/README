@@ -14,10 +14,6 @@ Structura si design:
     API gestiune: (app/app.py)
         Pentru fiecare ruta in parte (specificata in enunt) se trateaza cazurile de eroare si se updateaza
         rezultatele in baza de date (acolo unde este cazul).
-        Observatii:
-            - Timestamp-ul pentru temperaturi se salveaza in baza de date in format YYYY-MM-DD HH:MM:ss =>
-            atunci cand se face o verificare pentru temperaturi inregistrate pana la o anumita data, aceasta
-            nu va include ziua respectiva. (ex: pana la 2020-12-02 inseamna pana la 2020-12-02 00:00:00)
 
     Docker:
         docker-compose.yml:
@@ -47,6 +43,15 @@ Structura si design:
 
         variabile de mediu:
             - MYSQL_ROOT_PASSWORD: root (pentru baza de date)
+
+Observatii:
+    - Timestamp-ul pentru temperaturi se salveaza in baza de date in format YYYY-MM-DD HH:MM:ss =>
+    atunci cand se face o verificare pentru temperaturi inregistrate pana la o anumita data, aceasta
+    nu va include ziua respectiva. (ex: pana la 2020-12-02 inseamna pana la 2020-12-02 00:00:00)
+    - pentru rutele de temperaturi (Get temperatura cu idOras/ idTara), in cazul in care unul dintre parametri este intr-un format
+    gresit, nu se tine cont de acesta
+    - ex: pentru o cerere cu latitudine in format gresit, dar longitudine in format corect se va tine cont de id-ul orasului/tarii si de
+    longitudine (analog si pentru data)
 
 Pentru testare am pus la dispozitie si un client scris in python (el nu se afla inclus in proiect).
 In el am incercat sa cuprind toate cazurile (comportare normala/ erori/ corner case-uri) de functionare
