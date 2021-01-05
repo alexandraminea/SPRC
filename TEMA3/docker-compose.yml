@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto
+    container_name: mosquitto
+    ports:
+      - 1883:1883
+    restart: always
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+  influxdb:
+    image: influxdb:latest
+    container_name: influxdb
+    ports:
+      - 8086:8086
+    volumes:
+      - influxdb-storage:/var/lib/influxdb
+    restart: always
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    depends_on:
+      - influxdb
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana-storage:/var/lib/grafana
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards/
+      - ./grafana:/etc/grafana/provisioning
+    environment:
+      GF_SECURITY_ADMIN_USER: 'asistent'
+      GF_SECURITY_ADMIN_PASSWORD: 'grafanaSPRC2020'
+    restart: always
+
+  mqttbridge:
+    build: broker
+    image: mqttbridge
+    container_name: mqttbridge
+    depends_on:
+      - mosquitto
+      - influxdb
+    restart: always
+
+volumes:
+  grafana-storage:
+  influxdb-storage:
