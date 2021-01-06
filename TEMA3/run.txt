@@ -1,0 +1,8 @@
+docker service create --name registry --publish published=5000,target=5000 registry:2
+docker-compose up -d
+docker-compose down --volumes
+docker-compose push
+docker stack deploy -c docker-compose.yml sprc3
+docker stack rm sprc3
+docker-compose build mqttbridge
+docker service logs sprc3_mqttbridge

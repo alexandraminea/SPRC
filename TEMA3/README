@@ -1,0 +1,31 @@
+Minea Alexandra 342C3 - Tema3 SPRC
+
+Implementare:
+    - pentru brokerul de mesaje MQTT am ales imaginea "eclipse-mosquitto", deoarece este cea folosita la laborator
+    - pentru baza de date am folosit imaginea influxdb:latest, iar pentru persistenta datelor, volumul influxdb-storage
+    - adaptorul (broker/ broker.py) se conecteaza la brokerul MQTT si inregistreaza in baza de date informatiile extrase
+    din payloadul mesajelor 
+    - organizarea datelor in baza de date
+        - structura unei intrari in baza de date respecta urmatorul format:
+        json_body = [
+            {
+                'measurement': STATIE.METRICA,
+                'tags': {
+                    'location': LOCATIE,
+                    'station' : STATIE
+                },
+                'fields': {
+                    'value': VALOARE (de tip int/float)
+                },
+                'time' : TIMESTAMP
+            }
+        ]
+    - pentru componenta de vizualizare a datelor am folosit imaginea "grafana/grafana:latest"
+        - pentru ca datele sa fie persistente am folosit volumul grafana-storage
+        - DataSource Provisioning: pentru ca sursa de date (DataSource) si Dashboard-urile sa fie incarcate la start-up, am adaugat in structura proiectului:
+            1. grafana/datasources/datasource.yml -> pentru baza de date influxdb
+            2. grafana/dashboards/dasboard1.json -> pentru primul Dashboard (UPB IoT Data)
+               grafana/dashboards/dasboard2.json -> pentru al doilea Dashboard (Battery Dashboard)
+        - observatii: pentru nivelul de incarcare a bateriilor am folosit procente (intrucat nu era specificat in enunt), iar ca praguri min = 0, max = 100
+        
+

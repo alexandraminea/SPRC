@@ -2,6 +2,7 @@ import re
 import json
 import datetime
 from typing import NamedTuple
+import os
 
 import paho.mqtt.client as mqtt
 from influxdb import InfluxDBClient
@@ -16,9 +17,14 @@ INFLUXDB_DATABASE = 'sensor_db'
 MQTT_ADDRESS = 'mosquitto'
 MQTT_USER = 'mqttuser'
 MQTT_PASSWORD = 'mqttpassword'
-MQTT_TOPIC = '+/+'
+MQTT_TOPIC = '#'
 MQTT_REGEX = '([^/]+)/([^/]+)'
 MQTT_CLIENT_ID = 'MQTTInfluxDBBridge'
+
+DEBUG_DATA_FLOW = True
+if os.getenv('DEBUG_DATA_FLOW') is not None:
+    DEBUG_DATA_FLOW = os.getenv('DEBUG_DATA_FLOW')
+
 
 influxdb_client = InfluxDBClient(INFLUXDB_ADDRESS, 8086, INFLUXDB_USER, INFLUXDB_PASSWORD, None)
 
@@ -39,6 +45,10 @@ def isint(x):
     else:
         return a == b
 
+def log(message):
+    if DEBUG_DATA_FLOW:
+        print(message)
+
 class SensorData(NamedTuple):
     location: str
     measurement: str
@@ -48,24 +58,37 @@ class SensorData(NamedTuple):
 
 
 def on_connect(client, userdata, flags, rc):
-    """ The callback for when the client receives a CONNACK response from the server."""
     print('Connected with result code ' + str(rc))
     client.subscribe(MQTT_TOPIC)
 
 
 def on_message(client, userdata, msg):
-    """The callback for when a PUBLISH message is received from the server."""
+    now = str(datetime.datetime.utcnow())
+    now = now.split(".")[0]
+    log_message = now + " Received a message by topic " + msg.topic
+    print(log_message)
+
     payload = msg.payload.decode('utf-8')
     json_payload = json.loads(payload)
     timestamp_str = ""
     for key, value in json_payload.items():
         if "timestamp" in key:
             timestamp_str = value
+
+    if timestamp_str:
+        log_message = now + " Data timestamp is : " + timestamp_str
+    else:
+        log_message = now + " Data timestamp is : NOW"
+    print(log_message)
+
     for key, value in json_payload.items():
         if isint(value) or isfloat(value):
             sensor_data = _parse_mqtt_message(msg.topic, key, float(value), timestamp_str)
             if sensor_data is not None:
                 _send_sensor_data_to_influxdb(sensor_data)
+                log_message = now + " " + sensor_data.location + "." + sensor_data.measurement + " " + str(sensor_data.value)
+                print(log_message) 
+
 
 
 def _parse_mqtt_message(topic, measurement, value, timestamp_str):
@@ -97,7 +120,6 @@ def _send_sensor_data_to_influxdb(sensor_data):
             'time' : timestamp
         }
     ]
-    print(json_body)
     influxdb_client.write_points(json_body)
 
 

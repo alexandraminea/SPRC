@@ -33,7 +33,7 @@
       "fillGradient": 0,
       "gridPos": {
         "h": 8,
-        "w": 12,
+        "w": 23,
         "x": 0,
         "y": 0
       },
@@ -123,7 +123,6 @@
       },
       "yaxes": [
         {
-          "$$hashKey": "object:109",
           "format": "percent",
           "label": null,
           "logBase": 1,
@@ -132,7 +131,6 @@
           "show": true
         },
         {
-          "$$hashKey": "object:110",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -154,6 +152,7 @@
             "align": null,
             "filterable": false
           },
+          "decimals": 2,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -172,8 +171,8 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 9,
-        "w": 12,
+        "h": 11,
+        "w": 23,
         "x": 0,
         "y": 8
       },
@@ -182,8 +181,8 @@
         "showHeader": true,
         "sortBy": [
           {
-            "desc": false,
-            "displayName": "Time"
+            "desc": true,
+            "displayName": "Metric"
           }
         ]
       },
@@ -193,15 +192,9 @@
           "groupBy": [
             {
               "params": [
-                "$interval"
+                "station"
               ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "none"
-              ],
-              "type": "fill"
+              "type": "tag"
             }
           ],
           "measurement": "/_*.BAT/",
@@ -223,12 +216,6 @@
               {
                 "params": [],
                 "type": "min"
-              },
-              {
-                "params": [
-                  "Min"
-                ],
-                "type": "alias"
               }
             ],
             [
@@ -241,12 +228,18 @@
               {
                 "params": [],
                 "type": "max"
-              },
+              }
+            ],
+            [
               {
                 "params": [
-                  "Max"
+                  "value"
                 ],
-                "type": "alias"
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
               }
             ],
             [
@@ -259,12 +252,6 @@
               {
                 "params": [],
                 "type": "last"
-              },
-              {
-                "params": [
-                  "Current"
-                ],
-                "type": "alias"
               }
             ]
           ],
@@ -273,11 +260,30 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Panel Title",
+      "title": "Tabel",
       "transformations": [
         {
-          "id": "labelsToFields",
-          "options": {}
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "indexByName": {
+              "Time": 0,
+              "last": 2,
+              "max": 4,
+              "mean": 5,
+              "min": 3,
+              "station": 1
+            },
+            "renameByName": {
+              "last": "Current",
+              "max": "Max",
+              "mean": "Avg",
+              "min": "Min",
+              "station": "Metric"
+            }
+          }
         }
       ],
       "type": "table"

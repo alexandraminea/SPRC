@@ -37,6 +37,7 @@ services:
 
   mqttbridge:
     build: broker
+    # image: 127.0.0.1:5000/broker
     image: mqttbridge
     container_name: mqttbridge
     depends_on:
