@@ -44,6 +44,7 @@ class SensorData(NamedTuple):
     measurement: str
     value: float
     timestamp: str
+    station: str
 
 
 def on_connect(client, userdata, flags, rc):
@@ -73,7 +74,7 @@ def _parse_mqtt_message(topic, measurement, value, timestamp_str):
         location = match.group(1)
         station = match.group(2)
         measurm = station + "." + measurement
-        return SensorData(location=location, measurement=measurm, value=value, timestamp=timestamp_str)
+        return SensorData(location=location, measurement=measurm, value=value, timestamp=timestamp_str, station=station)
     else:
         return None
 
@@ -87,7 +88,8 @@ def _send_sensor_data_to_influxdb(sensor_data):
         {
             'measurement': sensor_data.measurement,
             'tags': {
-                'location': sensor_data.location
+                'location': sensor_data.location,
+                'station' : sensor_data.station
             },
             'fields': {
                 'value': sensor_data.value
