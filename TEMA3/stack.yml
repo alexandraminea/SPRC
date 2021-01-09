@@ -6,6 +6,8 @@ services:
     container_name: mosquitto
     ports:
       - 1883:1883
+    networks:
+      - broker-adapter
     restart: always
     volumes:
       - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
@@ -15,6 +17,9 @@ services:
     container_name: influxdb
     ports:
       - 8086:8086
+    networks:
+      - db-adapter
+      - db-grafana
     volumes:
       - influxdb-storage:/var/lib/influxdb
     restart: always
@@ -26,6 +31,8 @@ services:
       - influxdb
     ports:
       - 80:3000
+    networks:
+      - db-grafana
     volumes:
       - grafana-storage:/var/lib/grafana
       - ./grafana/dashboards:/etc/grafana/provisioning/dashboards/
@@ -35,11 +42,15 @@ services:
       GF_SECURITY_ADMIN_PASSWORD: 'grafanaSPRC2020'
     restart: always
 
-  mqttbridge:
-    build: broker
-    # image: 127.0.0.1:5000/broker
-    image: mqttbridge
-    container_name: mqttbridge
+  adapter:
+    build: adapter
+    environment:
+      - DEBUG_DATA_FLOW
+    image: adapter
+    container_name: adapter
+    networks:
+      - broker-adapter
+      - db-adapter
     depends_on:
       - mosquitto
       - influxdb
@@ -48,3 +59,9 @@ services:
 volumes:
   grafana-storage:
   influxdb-storage:
+
+networks:
+  broker-adapter:
+  db-adapter:
+  db-grafana:
+  

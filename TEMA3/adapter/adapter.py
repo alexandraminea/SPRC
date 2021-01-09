@@ -15,15 +15,17 @@ INFLUXDB_PASSWORD = 'mqtt'
 INFLUXDB_DATABASE = 'sensor_db'
 
 MQTT_ADDRESS = 'mosquitto'
-MQTT_USER = 'mqttuser'
-MQTT_PASSWORD = 'mqttpassword'
 MQTT_TOPIC = '#'
 MQTT_REGEX = '([^/]+)/([^/]+)'
 MQTT_CLIENT_ID = 'MQTTInfluxDBBridge'
 
-DEBUG_DATA_FLOW = True
-if os.getenv('DEBUG_DATA_FLOW') is not None:
-    DEBUG_DATA_FLOW = os.getenv('DEBUG_DATA_FLOW')
+DEBUG_DATA_FLOW = False
+
+def log(message):
+    if os.getenv('DEBUG_DATA_FLOW') is not None:
+        DEBUG_DATA_FLOW = os.getenv('DEBUG_DATA_FLOW')
+    if DEBUG_DATA_FLOW:
+        print(message)
 
 
 influxdb_client = InfluxDBClient(INFLUXDB_ADDRESS, 8086, INFLUXDB_USER, INFLUXDB_PASSWORD, None)
@@ -45,10 +47,6 @@ def isint(x):
     else:
         return a == b
 
-def log(message):
-    if DEBUG_DATA_FLOW:
-        print(message)
-
 class SensorData(NamedTuple):
     location: str
     measurement: str
@@ -58,7 +56,6 @@ class SensorData(NamedTuple):
 
 
 def on_connect(client, userdata, flags, rc):
-    print('Connected with result code ' + str(rc))
     client.subscribe(MQTT_TOPIC)
 
 
@@ -66,7 +63,7 @@ def on_message(client, userdata, msg):
     now = str(datetime.datetime.utcnow())
     now = now.split(".")[0]
     log_message = now + " Received a message by topic " + msg.topic
-    print(log_message)
+    log(log_message)
 
     payload = msg.payload.decode('utf-8')
     json_payload = json.loads(payload)
@@ -79,7 +76,7 @@ def on_message(client, userdata, msg):
         log_message = now + " Data timestamp is : " + timestamp_str
     else:
         log_message = now + " Data timestamp is : NOW"
-    print(log_message)
+    log(log_message)
 
     for key, value in json_payload.items():
         if isint(value) or isfloat(value):
@@ -87,7 +84,7 @@ def on_message(client, userdata, msg):
             if sensor_data is not None:
                 _send_sensor_data_to_influxdb(sensor_data)
                 log_message = now + " " + sensor_data.location + "." + sensor_data.measurement + " " + str(sensor_data.value)
-                print(log_message) 
+                log(log_message) 
 
 
 
@@ -126,7 +123,6 @@ def _send_sensor_data_to_influxdb(sensor_data):
 def _init_influxdb_database():
     databases = influxdb_client.get_list_database()
     if len(list(filter(lambda x: x['name'] == INFLUXDB_DATABASE, databases))) == 0:
-        print('Creating database ' + INFLUXDB_DATABASE)
         influxdb_client.create_database(INFLUXDB_DATABASE)
     influxdb_client.switch_database(INFLUXDB_DATABASE)
 
@@ -134,11 +130,9 @@ def _init_influxdb_database():
 def main():
     time.sleep(10)
 
-    print('Connecting to the database ' + INFLUXDB_DATABASE)
     _init_influxdb_database()
 
     mqtt_client = mqtt.Client(MQTT_CLIENT_ID)
-    mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
     mqtt_client.on_connect = on_connect
     mqtt_client.on_message = on_message
 
@@ -147,5 +141,4 @@ def main():
 
 
 if __name__ == '__main__':
-    print('MQTT to InfluxDB bridge')
     main()

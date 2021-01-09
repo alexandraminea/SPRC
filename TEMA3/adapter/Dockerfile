@@ -6,4 +6,4 @@ RUN pip install -r /requirements.txt
 COPY . /app
 WORKDIR /app
 
-CMD ["python3", "-u", "broker.py"]
+CMD ["python3", "-u", "adapter.py"]
